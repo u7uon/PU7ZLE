@@ -10,7 +10,7 @@ public class BlockDrag : MonoBehaviour
     private bool isDragging = false;
 
     [Header("Drag Effects")]
-    [SerializeField] private float liftScale = 1.1f;
+    [SerializeField] private float liftScale = 2f;
     [SerializeField] private float followSpeed = 20f;
 
     private void Awake()
@@ -20,19 +20,17 @@ public class BlockDrag : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Debug.Log("OnMouseDown");
         startPosition = transform.position;
         isDragging = true;
 
         Vector3 mouseWorld = GetMouseWorldPos();
         offset = transform.position - mouseWorld;
+        transform.localScale = Vector3.one ;;
 
-        transform.localScale *= liftScale;
     }
 
     private void OnMouseDrag()
     {
-        Debug.Log("OnMouseDrag");
         if (!isDragging) return;
 
         Vector3 targetPos = GetMouseWorldPos() + offset;
@@ -41,17 +39,34 @@ public class BlockDrag : MonoBehaviour
             targetPos,
             Time.deltaTime * followSpeed
         );
+        CusorManager.instance.OnHolding();
+    }
+
+    private void OnMouseEnter()
+    {
+        if (!isDragging)
+        {
+            CusorManager.instance.OnHover();
+        }
+    }
+
+    private void OnMouseExit()
+    {
+        if (!isDragging)
+        {
+            CusorManager.instance.OnNormal();
+        }
     }
 
     private void OnMouseUp()
     {
-        Debug.Log("OnMouseUp");
         isDragging = false;
 
         transform.localScale /= liftScale;
-
         // TẠM THỜI: thả ra quay về vị trí cũ
         transform.position = startPosition;
+        gameObject.transform.localScale = 0.5f * Vector3.one;
+        CusorManager.instance.OnNormal();
     }
 
     private Vector3 GetMouseWorldPos()
